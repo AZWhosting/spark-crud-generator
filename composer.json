@@ -1,0 +1,21 @@
+{
+    "name": "azwhosting/spark-crud-generator",
+    "description": "Interactive CRUD generator for CodeIgniter 4 with multilingual support.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+      "psr-4": {
+        "App\\": "src/"
+      }
+    },
+    "extra": {
+      "codeigniter4": {
+        "commands": {
+          "make:crud": "App\\Commands\\MakeCrud"
+        }
+      }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+  }
+  
