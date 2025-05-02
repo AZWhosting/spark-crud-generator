@@ -4,7 +4,6 @@ namespace SparkCrudGenerator\Commands;
 
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
-use SparkCrudGenerator\CrudGeneratorServiceProvider;
 
 class PublishCrudLang extends BaseCommand
 {
@@ -14,7 +13,22 @@ class PublishCrudLang extends BaseCommand
 
     public function run(array $params)
     {
-        CrudGeneratorServiceProvider::publish();
+        $basePath = realpath(__DIR__ . '/../../../resources/language');
+
+        $languages = ['en', 'fr'];
+        foreach ($languages as $lang) {
+            $source = "{$basePath}/{$lang}/CrudGenerator.php";
+            $targetDir = APPPATH . "Language/{$lang}";
+            $target = "{$targetDir}/CrudGenerator.php";
+
+            if (!is_dir($targetDir)) {
+                mkdir($targetDir, 0755, true);
+            }
+
+            copy($source, $target);
+        }
+
         CLI::write('✅ CRUD language files published to app/Language - Fichiers langue CRUD publiés dans app/Language', 'green');
     }
 }
+

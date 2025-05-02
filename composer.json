@@ -18,6 +18,11 @@
       "SparkCrudGenerator\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "SparkCrudGenerator\\Tests\\": "tests/"
+    }
+  },
   "extra": {
     "codeigniter4": {
       "discoverable": true
