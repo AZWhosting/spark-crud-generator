@@ -6,7 +6,7 @@ return [
     'askFieldName'       => 'Nom du champ (ou "done") pour passer à la suite',
     'askFieldType'       => 'Type pour {0} (ex: VARCHAR, TEXT, DECIMAL, INT)',
     'askFieldConstraint' => 'Taille/contrainte pour {0} (ex: 100, 10,2)',
-    'askNullable'        => 'Ce champ est-il nullable ? (y/n)',
+    'askNullable'        => 'Ce champ est-il nullable ? g(y/n)',
     'confirmOverwrite'   => 'Le fichier {0} existe déjà. Écraser ? (y/n)',
     'confirmAllExists'   => '❗ Des fichiers pour l\'entité "{0}" existent déjà. Continuer ? (y/n)',
     'abort'              => '⛔ Opération annulée.',
@@ -49,5 +49,10 @@ return [
     'emptyFieldName' => '❌ Le nom du champ ne peut pas être vide.',
     'invalidFieldName' => '❌ Nom de champ invalide. Utilisez uniquement des lettres, chiffres ou underscores, sans espace. Doit commencer par une lettre ou un underscore.',
     'reservedEntityName' => '❌ "{0}" est un mot réservé de PHP. Choisis un autre nom d\'entité.',
-
+    'routesReminder' => '📌 N\'oubliez pas d\'ajouter ces routes dans app/Config/Routes.php:',
+    'visitLink' => 'Accéder à l\'interface CRUD générée',
+    'askRunMigration'    => 'Souhaitez-vous executer la mise à jour dans la base de données ? (php spark migrate)',
+    'runningMigration'   => '🔁 Exécution des migrations...',
+    'migrationDone'      => '✅ Migration terminée !',
+    'editItem' => 'Modifier %s',
 ];

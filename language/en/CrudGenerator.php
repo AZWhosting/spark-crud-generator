@@ -1,5 +1,5 @@
 <?php
-
+// file: app/Language/en/CrudGenerator.php
 return [
     'commandDescription' => 'Generates an interactive CRUD: model, entity, migration, controller, views and templates',
     'askEntityName'      => "Entity name (e.g., Product)",
@@ -49,5 +49,10 @@ return [
     'emptyFieldName' => '❌ Field name cannot be empty.',
     'invalidFieldName' => '❌ Invalid field name. Use only letters, numbers, or underscores. Must start with a letter or underscore.',
     'reservedEntityName' => '❌ "{0}" is a reserved PHP keyword. Please choose another entity name.',
-
+    'routesReminder' => '📌 Don’t forget to add these routes in app/Config/Routes.php:',
+    'visitLink' => 'Access the generated CRUD interface',
+    'askRunMigration'    => 'Would you like to run the migration in the database? (php spark migrate)',
+    'runningMigration'   => '🔁 Running migrations...',
+    'migrationDone'      => '✅ Migration completed!',
+    'editItem' => 'Edit %s',
 ]; 

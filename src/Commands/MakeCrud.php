@@ -173,10 +173,35 @@ public function run(array $params)
     $this->generateViews($entity, $fields, $force, $summary);
     $this->generateTemplates($force, $summary);
 
+    // Résumé
     CLI::write(PHP_EOL . lang('CrudGenerator.generationSummary'), 'green');
     foreach ($summary as $part => $result) {
         CLI::write(" - {$part} : {$result}");
     }
+
+    // Demander si l'utilisateur veut exécuter la migration
+    if (CLI::prompt(lang('CrudGenerator.askRunMigration'), ['y', 'n']) === 'y') {
+        CLI::write(lang('CrudGenerator.runningMigration'), 'yellow');
+        command('migrate');
+        CLI::write(lang('CrudGenerator.migrationDone'), 'green');
+    }
+
+    // Ajout final : les routes à copier
+    $lcEntity = strtolower($entity);
+    CLI::write(PHP_EOL . lang('CrudGenerator.routesReminder'), 'blue');
+    CLI::write('');
+    CLI::write('$routes->group(\'' . $lcEntity . '\', static function($routes) {', 'white');
+    CLI::write("    \$routes->get('/', '{$entity}Controller::index');", 'white');
+    CLI::write("    \$routes->get('create', '{$entity}Controller::create');", 'white');
+    CLI::write("    \$routes->post('store', '{$entity}Controller::store');", 'white');
+    CLI::write("    \$routes->get('edit/(:num)', '{$entity}Controller::edit/\$1');", 'white');
+    CLI::write("    \$routes->post('update/(:num)', '{$entity}Controller::update/\$1');", 'white');
+    CLI::write("    \$routes->get('delete/(:num)', '{$entity}Controller::delete/\$1');", 'white');
+    CLI::write('});', 'white');
+
+    // Lien cliquable vers le CRUD généré
+    $url = base_url() . '' . $lcEntity;
+    CLI::write(PHP_EOL . '🔗 ' . lang('CrudGenerator.visitLink') . ': ' . $url, 'green');
 }
 
 
@@ -552,16 +577,16 @@ HTML;
         $index .= <<<HTML
         <th>Actions</th>
     </tr>
-    <?php foreach (\$${var}s as \${$var}): ?>
+    <?php foreach (\${$var}s as \${$var}): ?>
     <tr>
 HTML;
         foreach ($fields as $f) {
-            $index .= "        <td><?= \${$var}['{$f['name']}'] ?></td>\n";
+            $index .= "        <td><?= \${$var}->{$f['name']} ?></td>\n";
         }
         $index .= <<<HTML
         <td>
-            <a href="/{$var}/edit/<?= \${$var}['id'] ?>"><?= lang('CrudGenerator.edit') ?></a>
-            <a href="/{$var}/delete/<?= \${$var}['id'] ?>"><?= lang('CrudGenerator.delete') ?></a>
+            <a href="/{$var}/edit/<?= \${$var}->id ?>"><?= lang('CrudGenerator.edit') ?></a>
+            <a href="/{$var}/delete/<?= \${$var}->id ?>"><?= lang('CrudGenerator.delete') ?></a>
         </td>
     </tr>
     <?php endforeach; ?>
@@ -569,12 +594,11 @@ HTML;
 
 <?= \$this->include('templates/footer') ?>
 HTML;
+
         file_put_contents($indexPath, $index);
         $summary[lang('CrudGenerator.viewIndex')] = lang('CrudGenerator.generated');
-
     } else {
         $summary[lang('CrudGenerator.viewIndex')] = lang('CrudGenerator.skipped');
-;
     }
 
     // create.php
@@ -608,35 +632,39 @@ HTML;
 
     }
 
-    // edit.php
-    $editPath = $directory . 'edit.php';
-    if (!file_exists($editPath) || $force || CLI::prompt(lang('CrudGenerator.confirmOverwrite', ['edit.php']), ['y', 'n']) === 'y') {
-        $edit = <<<HTML
+// edit.php
+$editPath = $directory . 'edit.php';
+if (!file_exists($editPath) || $force || CLI::prompt(lang('CrudGenerator.confirmOverwrite', ['edit.php']), ['y', 'n']) === 'y') {
+    $edit = <<<HTML
 <?= \$this->include('templates/header') ?>
 
-<h1>Modifier {$var}</h1>
-<form action="/{$var}/update/<?= \${$var}['id'] ?>" method="post">
+<h1><?= sprintf(lang('CrudGenerator.editItem'), ucfirst('$var')) ?></h1>
+<form action="/{$var}/update/<?= \${$var}->id ?>" method="post">
 HTML;
-        foreach ($fields as $f) {
-            $edit .= <<<HTML
 
-    <label for="{$f['name']}">{$f['name']}</label>
-    <input type="text" name="{$f['name']}" id="{$f['name']}" value="<?= \${$var}['{$f['name']}'] ?>" />
-HTML;
-        }
+    foreach ($fields as $f) {
         $edit .= <<<HTML
 
-    <button type="submit"><?= lang('CrudGenerator.update') ?></button>
+    <label for="{$f['name']}">{$f['name']}</label>
+    <input type="text" name="{$f['name']}" id="{$f['name']}" value="<?= \${$var}->{$f['name']} ?>" />
+HTML;
+    }
 
+    $edit .= <<<HTML
+
+    <button type="submit"><?= lang('CrudGenerator.update') ?></button>
 </form>
 
 <?= \$this->include('templates/footer') ?>
 HTML;
-        file_put_contents($editPath, $edit);
-        $summary[lang('CrudGenerator.viewEdit')] = lang('CrudGenerator.generated');
-    } else {
-        $summary[lang('CrudGenerator.viewEdit')] = lang('CrudGenerator.skipped');
-    }
+
+    file_put_contents($editPath, $edit);
+    $summary[lang('CrudGenerator.viewEdit')] = lang('CrudGenerator.generated');
+} else {
+    $summary[lang('CrudGenerator.viewEdit')] = lang('CrudGenerator.skipped');
+}
+
+
 
     // show.php
     $showPath = $directory . 'show.php';
@@ -649,7 +677,8 @@ HTML;
         foreach ($fields as $f) {
             $show .= <<<HTML
 
-<p><strong>{$f['name']}:</strong> <?= \${$var}['{$f['name']}'] ?></p>
+<p><strong>{$f['name']}:</strong> <?= \${$var}->{$f['name']} ?></p>
+
 HTML;
         }
         $show .= <<<HTML
