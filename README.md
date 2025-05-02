@@ -203,7 +203,7 @@ Puis publiez les fichiers de langue :
 php spark crud:publish-lang
 ```
 
-### ⚙️ Installation
+### ⚙️ Installation manuelle
 
 Vous pouvez installer le générateur manuellement si vous n'utilisez pas Composer.
 
