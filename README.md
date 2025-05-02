@@ -29,16 +29,50 @@ Choose your language / Choisissez votre langue :
 - No file overwrite without confirmation
 - `--force` mode to skip confirmations
 - Clean structure: templates and CRUD folders
+- Auto migration execution prompt
+- Routes summary automatically displayed after generation
+- Direct clickable link to CRUD interface
+- Full entity support with `Entity` as object (no array access)
 
 ---
 
 ### ⚙️ Installation
 
-Put the generator in:
+#### Using Composer (recommended)
+
+```bash
+composer require azwhosting/spark-crud-generator --dev
+```
+
+Then publish the language files:
+
+```bash
+php spark crud:publish-lang
+```
+
+### ⚙️ Manual Installation
+
+You can install the generator manually if you don't use Composer.
+
+**Manual installation steps:**
+
+1. Place the following files in your project:
 
 ```
 app/Commands/MakeCrud.php
+app/Language/en/CrudGenerator.php
+app/Language/fr/CrudGenerator.php
 ```
+
+> 📌 Create the folders if they don’t exist.
+
+2. Run the generator from the Spark CLI:
+
+```bash
+php spark make:crud
+```
+
+3. Follow the interactive prompts to generate your CRUD.
 
 You can now call it via Spark CLI.
 
@@ -148,18 +182,50 @@ MIT License — Free to use, modify, share.
 - Aucun fichier écrasé sans confirmation
 - Mode `--force` pour tout passer en force
 - Structure claire : templates et vues par entité
+- Suggestion d'exécution automatique de la migration
+- Récapitulatif complet des routes à ajouter
+- Lien cliquable direct vers l'interface CRUD générée
+- Support complet des entités sous forme d'objets (plus d'accès tableau)
 
 ---
 
 ### ⚙️ Installation
 
-Placez le fichier dans :
+#### Via Composer (recommandé)
+
+```bash
+composer require azwhosting/spark-crud-generator --dev
+```
+
+Puis publiez les fichiers de langue :
+
+```bash
+php spark crud:publish-lang
+```
+
+### ⚙️ Installation
+
+Vous pouvez installer le générateur manuellement si vous n'utilisez pas Composer.
+
+**Étapes pour une installation manuelle :**
+
+1. Placez les fichiers suivants dans votre projet :
 
 ```
 app/Commands/MakeCrud.php
+app/Language/en/CrudGenerator.php
+app/Language/fr/CrudGenerator.php
 ```
 
-Puis exécutez-le via Spark CLI.
+> 📌 Créez les dossiers s'ils n'existent pas.
+
+2. Lancez le générateur depuis le terminal Spark :
+
+```bash
+php spark make:crud
+```
+
+3. Suivez les instructions interactives pour générer le CRUD.
 
 ---
 

@@ -15,10 +15,13 @@
   },
   "autoload": {
     "psr-4": {
-      "App\\": "src/"
+      "SparkCrudGenerator\\": "src/"
     }
   },
   "extra": {
+    "codeigniter4": {
+      "discoverable": true
+    },
     "branch-alias": {
       "dev-main": "1.0.x-dev"
     }
@@ -26,7 +29,3 @@
   "minimum-stability": "stable",
   "prefer-stable": true
 }
-
-  
-  
-
