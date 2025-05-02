@@ -1,3 +1,4 @@
+
 # 📦 CHANGELOG
 
 Choose your language / Choisissez votre langue :
@@ -7,6 +8,22 @@ Choose your language / Choisissez votre langue :
 ---
 
 ## 🇬🇧 English
+
+### [1.0.2] - 2025-05-02
+
+#### Added
+- ✨ `crud:publish-lang` command to publish language files to `app/Language`.
+- 🛠 Composer autoload and `extra.codeigniter4.discoverable` support.
+- 📦 `INSTALL.md` added for Composer usage.
+- 🌐 Full rework of manual/Composer installation in README.
+
+#### Changed
+- 🧹 Cleaned service provider (replaced by publish command).
+
+#### Removed
+- ❌ Legacy `CrudGeneratorServiceProvider` removed.
+
+---
 
 ### [1.0.1] - 2025-05-02
 
@@ -48,6 +65,22 @@ Choose your language / Choisissez votre langue :
 ---
 
 ## 🇫🇷 Français
+
+### [1.0.2] - 2025-05-02
+
+#### Ajouts
+- ✨ Commande `crud:publish-lang` pour publier les fichiers de langue dans `app/Language`.
+- 🛠 Support Composer autoload et `extra.codeigniter4.discoverable`.
+- 📦 Fichier `INSTALL.md` pour installation via Composer.
+- 🌐 Documentation révisée pour installation manuelle/Composer.
+
+#### Modifications
+- 🧹 Nettoyage du provider (remplacé par la commande `crud:publish-lang`).
+
+#### Suppressions
+- ❌ Suppression du fichier `CrudGeneratorServiceProvider`.
+
+---
 
 ### [1.0.1] - 2025-05-02
 
