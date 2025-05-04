@@ -4,3 +4,6 @@
 .vscode/
 *.log
 writable/
+dev-sav/
+src/Commands/MakeCrud-V*.php
+app/Commands/MakeCrud-V*.php

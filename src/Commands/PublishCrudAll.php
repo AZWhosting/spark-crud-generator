@@ -1,37 +1,9 @@
 <?php
-
+// Path: src/Commands/PublishCrudAll.php
 namespace SparkCrudGenerator\Commands;
 
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
-
-class PublishCrudLang extends BaseCommand
-{
-    protected $group       = 'custom';
-    protected $name        = 'crud:publish-lang';
-    protected $description = 'Publish only CRUD language files to app/Language';
-
-    public function run(array $params)
-    {
-        $langPath = realpath(__DIR__ . '/../../../resources/language');
-
-        foreach (['en', 'fr'] as $lang) {
-            $source = "{$langPath}/{$lang}/CrudGenerator.php";
-            $targetDir = APPPATH . "Language/{$lang}";
-            $target = "{$targetDir}/CrudGenerator.php";
-
-            if (!is_dir($targetDir)) {
-                mkdir($targetDir, 0755, true);
-            }
-
-            if (copy($source, $target)) {
-                CLI::write("✅ {$lang} language file published.", 'green');
-            }
-        }
-
-        CLI::write('🌍 Language files published to app/Language', 'green');
-    }
-}
 
 class PublishCrudAll extends BaseCommand
 {

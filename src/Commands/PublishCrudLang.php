@@ -1,5 +1,5 @@
 <?php
-
+// Path: src/Commands/PublishCrudLang.php
 namespace SparkCrudGenerator\Commands;
 
 use CodeIgniter\CLI\BaseCommand;
@@ -13,7 +13,7 @@ class PublishCrudLang extends BaseCommand
 
     public function run(array $params)
     {
-        $basePath = realpath(__DIR__ . '/../../../resources/language');
+        $basePath = realpath(__DIR__ . '/../../../resources/app/language');
 
         $languages = ['en', 'fr'];
         foreach ($languages as $lang) {
