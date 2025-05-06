@@ -1,4 +1,10 @@
-# 🌐 CodeIgniter 4 Interactive CRUD Generator
+# 🚀 Spark CRUD Generator for CodeIgniter 4
+
+![Version](https://img.shields.io/github/v/tag/AZWhosting/spark-crud-generator?label=version&sort=semver)
+![License](https://img.shields.io/github/license/AZWhosting/spark-crud-generator)
+![PHP](https://img.shields.io/badge/php-%3E=7.4-blue)
+![CI4 Compatible](https://img.shields.io/badge/CodeIgniter-4.x-red)
+
 
 Choose your language / Choisissez votre langue :
 - [🇬🇧 English](#-english-version)
