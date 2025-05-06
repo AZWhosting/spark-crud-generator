@@ -62,6 +62,27 @@ Add your own locale files to extend.
 
 ---
 
+
+
+## 🎨 Template Themes
+
+At startup, you'll be prompted to select a theme (folder in `resources/templates/`).
+
+To create your own:
+- Copy `resources/templates/default/` into a new folder (e.g. `bootstrap/`)
+- Edit any `.tpl` file: `controller.tpl`, `model.tpl`, etc.
+
+---
+
+## 🔄 Automatic Route Injection
+
+At the end of the generation, you're asked if routes should be added automatically into `app/Config/Routes.php`.
+
+- If accepted, routes from `route.tpl` are appended.
+- Backup of `Routes.php` is created.
+- Manual route suggestion is always displayed as fallback.
+
+
 ## 📝 License
 
 MIT — Feel free to use and modify.

@@ -11,12 +11,12 @@ Choose your language / Choisissez votre langue :
 ### 📚 Table of Contents
 
 - [✨ Features](#-features)
-- [⚙️ Installation](#️-installation)
+- [⚙️ Installation](#installation)
 - [🚀 Usage](#-usage)
 - [📄 Options](#-options)
 - [🌍 Localization](#-localization)
 - [📁 Generated Structure](#-generated-structure)
-- [🛡️ Safeguards](#️-safeguards)
+- [🛡️ Safeguards](#safeguards)
 - [📝 License](#-license)
 
 ---
@@ -33,7 +33,11 @@ Choose your language / Choisissez votre langue :
 - Routes summary automatically displayed after generation
 - Direct clickable link to CRUD interface
 - Full entity support with `Entity` as object (no array access)
-
+- Supports template themes (e.g., default, bootstrap, etc.)
+- Modular architecture with dedicated classes per generator (model, controller, views, etc.)
+- All code is rendered from .tpl files for full customization
+- Header and footer layout support via layout templates
+- Detects missing routes and optionally injects them into Routes.php
 ---
 
 ### ⚙️ Installation
@@ -94,6 +98,30 @@ Example:
 ```bash
 php spark make:crud Product
 ```
+---
+
+### 🧩 Custom Templates
+
+You can define your own generation theme by duplicating the default templates:
+
+1. Copy the folder `resources/templates/default/` into a new folder `resources/templates/your-theme/`
+2. Customize any `.tpl` file (controller, model, views, etc.)
+3. Run `php spark make:crud` and select your theme when prompted
+
+Templates use placeholders like `{{entity}}`, `{{fields}}`, `{{formFields}}`, etc.
+
+---
+
+### 🔄 Automatic Route Injection
+
+After generation, the system offers to automatically inject routes into `app/Config/Routes.php`.
+
+- If routes already exist, they will be skipped.
+- If missing, the lines from `route.tpl` will be inserted after confirmation.
+- A backup of `Routes.php` is automatically created before any modification.
+- Manual fallback is always shown in case of conflict or refusal.
+
+You can customize the injected routes by editing the `route.tpl` file inside your selected template.
 
 ---
 
@@ -164,12 +192,12 @@ MIT License — Free to use, modify, share.
 ### 📚 Sommaire
 
 - [✨ Fonctionnalités](#-fonctionnalités)
-- [⚙️ Installation](#️-installation-1)
+- [⚙️ Installation](#installation-1)
 - [🚀 Utilisation](#-utilisation)
 - [📄 Options](#-options-1)
 - [🌍 Localisation](#-localisation)
 - [📁 Structure générée](#-structure-générée)
-- [🛡️ Sécurités](#️-sécurités)
+- [🛡️ Sécurités](#sécurités)
 - [📝 Licence](#-licence)
 
 ---
@@ -186,6 +214,11 @@ MIT License — Free to use, modify, share.
 - Récapitulatif complet des routes à ajouter
 - Lien cliquable direct vers l'interface CRUD générée
 - Support complet des entités sous forme d'objets (plus d'accès tableau)
+- Prise en charge des thèmes de templates (ex. : `default`, `bootstrap`, etc.)
+- Architecture modulaire avec une classe dédiée par générateur (modèle, contrôleur, vues, etc.)
+- Tout le code est généré à partir de fichiers `.tpl` entièrement personnalisables
+- Gestion des layouts `header` et `footer` via des templates dédiés
+- Détection des routes manquantes et injection automatique optionnelle dans `Routes.php`
 
 ---
 
@@ -226,6 +259,31 @@ php spark make:crud
 ```
 
 3. Suivez les instructions interactives pour générer le CRUD.
+
+---
+
+### 🧩 Templates personnalisés
+
+Vous pouvez définir votre propre thème de génération en dupliquant les templates par défaut :
+
+1. Copiez le dossier `resources/templates/default/` vers un nouveau dossier `resources/templates/votre-theme/`
+2. Personnalisez les fichiers `.tpl` (contrôleur, modèle, vues, etc.)
+3. Lancez la commande `php spark make:crud` et sélectionnez votre thème lorsqu’il est proposé
+
+Les templates utilisent des balises comme `{{entity}}`, `{{fields}}`, `{{formFields}}`, etc.
+
+---
+
+## 🔄 Injection automatique des routes
+
+À la fin de la génération, le système vous propose d’ajouter automatiquement les routes dans `app/Config/Routes.php`.
+
+- Si les routes existent déjà, elles seront ignorées.
+- Si elles sont absentes, les lignes de `route.tpl` seront insérées après confirmation.
+- Une sauvegarde du fichier `Routes.php` est automatiquement créée avant toute modification.
+- Un rappel manuel est toujours affiché en cas de refus ou de conflit.
+
+Vous pouvez personnaliser les routes injectées en modifiant le fichier `route.tpl` du thème utilisé
 
 ---
 

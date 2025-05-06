@@ -55,4 +55,22 @@ return [
     'runningMigration'   => '🔁 Running migrations...',
     'migrationDone'      => '✅ Migration completed!',
     'editItem' => 'Edit %s',
+    'templateChoice' => 'Which template do you want to use?',
+    'templateChoice'        => 'Which template do you want to use?',
+    'askEntityName'         => 'Enter the name of the entity',
+    'invalidEntityName'     => 'Invalid entity name. Must start with a capital letter and contain only letters, numbers or underscores.',
+    'reservedEntityName'    => 'This is a PHP reserved word. Please choose another name.',
+    'fieldPrompt'        => 'Define fields for your entity (type "q" to quit):',
+    'fieldType'          => 'Field type',
+    'fieldNullable'      => 'Nullable?',
+    'fieldUnique'        => 'Unique?',
+    'templateNotFound' => 'Template file not found: {0}',
+    'routesNotWritable' => '❌ Routes.php is not writable.',
+    'routesAdded'       => '✅ Routes added to Config/Routes.php',
+    'routesAllExist'    => 'ℹ️ All routes for {0} already exist.',
+    'templateDirNotFound' => 'No templates found in: {0}',
+    'askAutoRoutes' => 'Would you like to add these routes to app/Config/Routes.php automatically?',
+
+
+
 ]; 

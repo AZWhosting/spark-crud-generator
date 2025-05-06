@@ -1,231 +1,254 @@
 <?php
-namespace App\Commands;
+// file: spark-crud-generator/src/Commands/MakeCrud.php
+namespace SparkCrudGenerator\Commands;
 
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
+use SparkCrudGenerator\Services\TemplateRenderer;
+use SparkCrudGenerator\Generators\ControllerGenerator;
+use SparkCrudGenerator\Generators\ModelGenerator;
+use SparkCrudGenerator\Generators\EntityGenerator;
+use SparkCrudGenerator\Generators\MigrationGenerator;
+use SparkCrudGenerator\Generators\ViewGenerator;
+use SparkCrudGenerator\Generators\LayoutGenerator;
+use SparkCrudGenerator\Generators\RouteManager;
 
+/**
+ * Class MakeCrud
+ *
+ * 🇬🇧 Main command to generate CRUD files using modular generators.
+ * 🇫🇷 Commande principale pour générer un CRUD à l’aide de générateurs modulaires.
+ */
 class MakeCrud extends BaseCommand
 {
     protected $group       = 'Generators';
     protected $name        = 'make:crud';
-    protected $description = 'Interactive CRUD generator for CodeIgniter 4';
-    protected $usage       = 'make:crud';
-    protected $arguments   = [];
-    protected $options     = [
-        '--force' => 'Force file overwrite without confirmation',
-    ];
+    protected $description = 'Generates a CRUD module (model, entity, controller, views, migration) using templates.';
 
-    public function run(array $params)
+    protected string $activeTemplate = 'default';
+    protected bool $force = false;
+
+    /**
+     * Entry point for the Spark CLI command.
+     *
+     * 🇬🇧 Launches the interactive CRUD generator.
+     * 🇫🇷 Lance l’interface interactive de génération CRUD.
+     *
+     * @param array $params CLI parameters
+     * @return void
+     */
+public function run(array $params)
+{
+    // ⬇️ ⬅️ Test langue
+    $lang = \Config\Services::language();
+    $currentLocale = $lang->getLocale();
+    CLI::write("🌍 Active locale: {$currentLocale}", 'yellow');
+
+    $testKey = lang('CrudGenerator.askEntityName');
+    if ($testKey === 'CrudGenerator.askEntityName') {
+        CLI::error("❌ Language file not loaded or missing key: CrudGenerator.askEntityName");
+    } else {
+        CLI::write("✅ Language file loaded, sample value: {$testKey}", 'green');
+    }
+
+    $this->askTemplate();
+    $entity = $this->askEntityName();
+    $fields = $this->askFields();
+
+    $this->force = CLI::getOption('force') ?? false;
+    $renderer = new TemplateRenderer($this->activeTemplate);
+
+    // Slugify the route base from entity (e.g., MyProduct => my-product)
+    $routeBase = strtolower(preg_replace('/(?<!^)[A-Z]/', '-$0', $entity));
+
+    // Launch each modular generator
+    (new ModelGenerator($entity, $fields, $renderer, $this->force))->generate();
+    (new EntityGenerator($entity, $fields, $renderer, $this->force))->generate();
+    (new ControllerGenerator($entity, $renderer, $this->force))->generate();
+    (new MigrationGenerator($entity, $fields, $renderer, $this->force))->generate();
+    (new ViewGenerator($entity, $fields, $renderer, $this->force))->generate();
+    (new LayoutGenerator($renderer, $this->force))->generate();
+    (new RouteManager($entity, $routeBase, $renderer))->handle();
+
+
+    $this->askRunMigration();
+}
+
+
+    /**
+     * Ask the user to select a template folder.
+     *
+     * 🇬🇧 Prompts user to choose which template (theme) to use.
+     * 🇫🇷 Demande à l'utilisateur de choisir un dossier de templates.
+     *
+     * @return void
+     */
+    protected function askTemplate(): void
     {
-        CLI::write('⚙️  Starting interactive CRUD generation...', 'green');
+        $basePath = __DIR__ . '/../../resources/templates/';
+        /*$templates = array_filter(scandir($basePath), fn($d) =>
+            $d !== '.' && $d !== '..' && is_dir($basePath . $d)
+        );*/
+        $templates = array_values(
+            array_filter(scandir($basePath), function ($d) use ($basePath) {
+                return $d !== '.' && $d !== '..' && is_dir($basePath . DIRECTORY_SEPARATOR . $d);
+            })
+        );
 
-        // Étape 1 : Demander et valider le nom de l'entité
-        $entityName = $this->askEntityName();
-        $fields = $this->askFields();
-        $this->generateMigration($entityName, $fields);
-        $this->generateModel($entityName, $fields);
-        $this->generateController($entityName);
-        $this->generateEntity($entityName);
+        if (empty($templates)) {
+            throw new \RuntimeException(lang('CrudGenerator.templateDirNotFound', [$basePath]));
+        }
+        
+        CLI::write("Templates found: " . implode(', ', $templates), 'yellow');
 
-
-
-
-        CLI::write("✅ Entity name set to: {$entityName}", 'green');
-
-        // Étapes suivantes à venir...
+        $choice = CLI::prompt(lang('CrudGenerator.templateChoice') . ' [' . implode(', ', $templates) . ']', $templates);
+        $this->activeTemplate = $choice;
+        CLI::write(">> Using template: {$this->activeTemplate}", 'green');
     }
 
     /**
-     * 🔹 Étape 1 : Saisie et validation du nom d'entité
+     * Ask and validate the entity name.
+     *
+     * 🇬🇧 Prompts user for an entity name and validates format and reserved words.
+     * 🇫🇷 Demande le nom de l’entité et vérifie le format ainsi que les mots réservés PHP.
+     *
+     * @return string Validated entity name
      */
-    private function askEntityName(): string
+    protected function askEntityName(): string
     {
+        helper('inflector');
+
+        // Liste des mots réservés en PHP (vérifiés à la main)
+        $reserved = [
+            'class', 'function', 'trait', 'interface', 'extends', 'implements', 'static',
+            'public', 'protected', 'private', 'const', 'var', 'if', 'else', 'while', 'for',
+            'foreach', 'switch', 'case', 'default', 'break', 'continue', 'try', 'catch',
+            'finally', 'throw', 'return', 'yield', 'new', 'clone', 'true', 'false', 'null',
+            'and', 'or', 'xor', 'instanceof', 'global', 'namespace', 'use', 'require',
+            'include', 'require_once', 'include_once', '__halt_compiler', 'goto', 'echo',
+            'print', 'list', 'array', 'isset', 'unset', 'empty', 'eval', 'exit', 'die'
+        ];
+
         while (true) {
-            $name = CLI::prompt('📝 Enter the name of the entity (e.g. Product)', null, 'required');
+            $entity = CLI::prompt(lang('CrudGenerator.askEntityName'));
 
-            // Validation stricte
-            if (! preg_match('/^[A-Z][A-Za-z0-9_]{2,}$/', $name)) {
-                CLI::error('❌ Invalid name. Use PascalCase, start with a letter, min 3 chars.');
+            if (! preg_match('/^[A-Z][A-Za-z0-9_]*$/', $entity)) {
+                CLI::error(lang('CrudGenerator.invalidEntityName'));
                 continue;
             }
 
-            if (in_array(strtolower($name), $this->getPhpReservedKeywords(), true)) {
-                CLI::error("❌ '{$name}' is a reserved PHP keyword.");
+            if (in_array(strtolower($entity), $reserved)) {
+                CLI::error(lang('CrudGenerator.reservedEntityName', [$entity]));
                 continue;
             }
 
-            return $name;
+            return $entity;
         }
     }
 
-    private function getPhpReservedKeywords(): array
+    /**
+     * Interactive loop to define entity fields.
+     *
+     * 🇬🇧 Asks the user to define each field (name, type, constraint, nullable, unique) with validation.
+     * 🇫🇷 Demande les champs de l’entité avec validation (type, contrainte, nullable, unique).
+     *
+     * @return array List of fields
+     */
+    protected function askFields(): array
     {
-        return [
-            '__halt_compiler', 'abstract', 'and', 'array', 'as', 'break', 'callable', 'case',
-            'catch', 'class', 'clone', 'const', 'continue', 'declare', 'default', 'die', 'do',
-            'echo', 'else', 'elseif', 'empty', 'enddeclare', 'endfor', 'endforeach', 'endif',
-            'endswitch', 'endwhile', 'eval', 'exit', 'extends', 'final', 'finally', 'for',
-            'foreach', 'function', 'global', 'goto', 'if', 'implements', 'include', 'include_once',
-            'instanceof', 'insteadof', 'interface', 'isset', 'list', 'match', 'namespace', 'new',
-            'or', 'print', 'private', 'protected', 'public', 'readonly', 'require', 'require_once',
-            'return', 'static', 'switch', 'throw', 'trait', 'try', 'unset', 'use', 'var', 'while', 'xor',
+        CLI::write(lang('CrudGenerator.fieldPrompt'), 'blue');
+
+        $typesMap = [
+            '1' => 'VARCHAR',
+            '2' => 'TEXT',
+            '3' => 'DECIMAL',
+            '4' => 'INT',
+            '5' => 'DATE',
+            '6' => 'DATETIME',
         ];
-    }
 
+        $reserved = [ // PHP reserved names
+            'class', 'function', 'trait', 'interface', 'extends', 'implements', 'static',
+            'public', 'protected', 'private', 'const', 'var', 'if', 'else', 'while', 'for',
+            'foreach', 'switch', 'case', 'default', 'break', 'continue', 'try', 'catch',
+            'finally', 'throw', 'return', 'yield', 'new', 'clone', 'true', 'false', 'null',
+            'and', 'or', 'xor', 'instanceof', 'global', 'namespace', 'use', 'require',
+            'include', 'require_once', 'include_once', '__halt_compiler', 'goto', 'echo',
+            'print', 'list', 'array', 'isset', 'unset', 'empty', 'eval', 'exit', 'die'
+        ];
 
-    private function askFields(): array
-    {
         $fields = [];
 
-        CLI::write("➕ Let's define the fields for this entity", 'cyan');
-
         while (true) {
-            $name = CLI::prompt('Field name (leave empty to finish)');
-            if (empty($name)) {
+            $field = CLI::prompt(lang('CrudGenerator.askFieldName'));
+
+            if (strtolower($field) === 'done' || strtolower($field) === 'q') {
                 break;
             }
 
-            if (! preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $name)) {
-                CLI::error("❌ Invalid field name: {$name}");
+            if ($field === '') {
+                CLI::error(lang('CrudGenerator.emptyFieldName'));
                 continue;
             }
 
-            $type = CLI::prompt('Field type (string, text, integer, float, boolean, date, datetime)', 'string');
+            if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $field)) {
+                CLI::error(lang('CrudGenerator.invalidFieldName'));
+                continue;
+            }
 
-            $nullable = CLI::prompt('Nullable? (yes/no)', 'no') === 'yes';
-            $unique   = CLI::prompt('Unique? (yes/no)', 'no') === 'yes';
+            if (in_array(strtolower($field), $reserved)) {
+                CLI::error(lang('CrudGenerator.reservedFieldName', [$field]));
+                continue;
+            }
+
+            // Affichage des types
+            CLI::write(lang('CrudGenerator.typeList'), 'cyan');
+            $typeInput = strtoupper(CLI::prompt(lang('CrudGenerator.askFieldType', [$field])));
+
+            $type = $typesMap[$typeInput] ?? (in_array($typeInput, $typesMap) ? $typeInput : null);
+
+            while (!$type) {
+                CLI::error(lang('CrudGenerator.invalidType'));
+                CLI::write(lang('CrudGenerator.typeList'), 'cyan');
+                $typeInput = strtoupper(CLI::prompt(lang('CrudGenerator.askFieldType', [$field])));
+                $type = $typesMap[$typeInput] ?? (in_array($typeInput, $typesMap) ? $typeInput : null);
+            }
+
+            // Contrainte uniquement pour VARCHAR, DECIMAL, INT
+            $constraint = in_array($type, ['VARCHAR', 'DECIMAL', 'INT'])
+                ? CLI::prompt(lang('CrudGenerator.askFieldConstraint', [$field]))
+                : null;
+
+            $nullable = CLI::prompt(lang('CrudGenerator.askNullable'), ['y', 'n']) === 'y';
+            $unique   = CLI::prompt(lang('CrudGenerator.fieldUnique') . ' (y/n)', ['y', 'n']) === 'y';
 
             $fields[] = [
-                'name'     => $name,
-                'type'     => $type,
-                'nullable' => $nullable,
-                'unique'   => $unique,
+                'name'       => $field,
+                'type'       => $type,
+                'constraint' => $constraint,
+                'nullable'   => $nullable,
+                'unique'     => $unique,
             ];
         }
 
-        CLI::write('✅ Fields collected: ' . count($fields), 'green');
-
         return $fields;
     }
-    
-    private function generateMigration(string $entityName, array $fields): void
-    {
-        $timestamp = date('YmdHis');
-        $tableName = strtolower($entityName);
-        $className = "Create{$entityName}Table";
-        $filename  = "{$timestamp}_create_{$tableName}_table.php";
-        $path      = APPPATH . "Database/Migrations/{$filename}";
 
-        $content = "<?php\n\n";
-        $content .= "namespace App\Database\Migrations;\n\n";
-        $content .= "use CodeIgniter\Database\Migration;\n\n";
-        $content .= "class {$className} extends Migration\n{\n";
-        $content .= "    public function up()\n    {\n";
-        $content .= "        \$this->forge->addField([\n";
-        $content .= "            'id' => [\n";
-        $content .= "                'type'           => 'INT',\n";
-        $content .= "                'constraint'     => 11,\n";
-        $content .= "                'unsigned'       => true,\n";
-        $content .= "                'auto_increment' => true,\n";
-        $content .= "            ],\n";
-
-        foreach ($fields as $field) {
-            $content .= "            '{$field['name']}' => [\n";
-            $content .= "                'type' => '" . strtoupper($field['type']) . "',\n";
-
-            if ($field['nullable']) {
-                $content .= "                'null' => true,\n";
-            }
-
-            if ($field['unique']) {
-                $content .= "                'unique' => true,\n";
-            }
-
-            $content .= "            ],\n";
-        }
-
-        $content .= "            'created_at DATETIME DEFAULT CURRENT_TIMESTAMP',\n";
-        $content .= "            'updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',\n";
-        $content .= "        ]);\n";
-        $content .= "        \$this->forge->addKey('id', true);\n";
-        $content .= "        \$this->forge->createTable('{$tableName}');\n";
-        $content .= "    }\n\n";
-        $content .= "    public function down()\n    {\n";
-        $content .= "        \$this->forge->dropTable('{$tableName}');\n";
-        $content .= "    }\n";
-        $content .= "}\n";
-
-        file_put_contents($path, $content);
-
-        CLI::write("✅ Migration created: {$filename}", 'green');
-    }
 
     /**
-     * Génère un fichier Model pour l'entité donnée.
+     * Ask whether to run migrations now.
      *
-     * @param string $entityName Nom de l'entité (ex. Product)
-     * @param array  $fields     Liste des champs définis par l'utilisateur
-     *
-     * @return void
-     */
-    private function generateModel(string $entityName, array $fields): void
-    {
-        $className = $entityName . 'Model';
-        $filePath  = APPPATH . "Models/{$className}.php";
-        $table     = strtolower($entityName);
-        $entity    = "App\\Entities\\{$entityName}";
-
-        $fieldNames    = array_map(fn($f) => "'{$f['name']}'", $fields);
-        $allowedFields = implode(', ', $fieldNames);
-
-        $content = "<?php\n\n";
-        $content .= "namespace App\Models;\n\n";
-        $content .= "use CodeIgniter\Model;\n\n";
-        $content .= "class {$className} extends Model\n";
-        $content .= "{\n";
-        $content .= "    protected \$table      = '{$table}';\n";
-        $content .= "    protected \$primaryKey = 'id';\n\n";
-        $content .= "    protected \$returnType    = '{$entity}';\n";
-        $content .= "    protected \$useSoftDeletes = false;\n\n";
-        $content .= "    protected \$allowedFields = [{$allowedFields}];\n\n";
-        $content .= "    protected \$useTimestamps = true;\n";
-        $content .= "    protected \$createdField  = 'created_at';\n";
-        $content .= "    protected \$updatedField  = 'updated_at';\n";
-        $content .= "}\n";
-
-        file_put_contents($filePath, $content);
-
-        CLI::write("✅ Model created: {$className}.php", 'green');
-    }
-
-     /**
-     * Generate an Entity class file for the given entity name.
-     * Génère une classe d'entité pour le nom d'entité donné.
-     *
-     * @param string $entityName Name of the entity / Nom de l'entité (e.g. Product)
+     * 🇬🇧 Propose to run php spark migrate after generation.
+     * 🇫🇷 Propose d’exécuter la migration après génération.
      *
      * @return void
      */
-    private function generateEntity(string $entityName): void
+    protected function askRunMigration(): void
     {
-        $className = $entityName;
-        $filePath  = APPPATH . "Entities/{$className}.php";
-
-        $content = "<?php\n\n";
-        $content .= "namespace App\Entities;\n\n";
-        $content .= "use CodeIgniter\Entity\Entity;\n\n";
-        $content .= "class {$className} extends Entity\n";
-        $content .= "{\n";
-        $content .= "    // You can add accessors, mutators, and virtual attributes here\n";
-        $content .= "    // Vous pouvez ajouter des accesseurs, mutateurs, ou attributs virtuels ici\n";
-        $content .= "}\n";
-
-        file_put_contents($filePath, $content);
-
-        CLI::write("✅ Entity created: {$className}.php", 'green');
+        if (CLI::prompt(lang('CrudGenerator.askRunMigration'), ['y', 'n']) === 'y') {
+            CLI::write(lang('CrudGenerator.runningMigration'), 'cyan');
+            command('migrate');
+            CLI::write(lang('CrudGenerator.migrationDone'), 'green');
+        }
     }
-
-
-
-
-} // End of file MakeCrud.php
+}
